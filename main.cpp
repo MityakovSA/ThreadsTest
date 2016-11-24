@@ -18,7 +18,6 @@ bool done = false;
 void _print(int ind, int n)
 {
     {
-        //std::this_thread::sleep_for(std::chrono::seconds(1));
         std::unique_lock<std::mutex> locker(lockprint);
         std::cout << ind << ") THREAD_ID: " << std::this_thread::get_id() << std::endl;
     }
@@ -30,7 +29,6 @@ void _print(int ind, int n)
         {
             check.wait(locker);
         }
-        if (done) return;
         while ((!values.empty()) && (notified.at(ind)))
         {
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -47,7 +45,7 @@ void _print(int ind, int n)
             notified.at(ind) = false;
             if (ind == (n-1)) notified.at(0) = true;
             else notified.at(ind+1) = true;
-            check.notify_one();
+            check.notify_all();
         }
     }
 
@@ -57,7 +55,7 @@ void _print(int ind, int n)
 
 int main()
 {
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         values.push(i+1);
     }
